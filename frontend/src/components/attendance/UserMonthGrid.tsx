@@ -18,6 +18,12 @@ type Props = {
   workStart: string;
 };
 
+type DayInfo = {
+  status: 'late' | 'ontime';
+  checkIn: string;
+  checkOut: string | null;
+};
+
 export default function UserMonthGrid({ year, month, userId, workStart }: Props) {
   const navigate = useNavigate();
 
@@ -42,11 +48,15 @@ export default function UserMonthGrid({ year, month, userId, workStart }: Props)
     (r) => r.userId === userId && r.date.startsWith(prefix),
   );
 
-  const dayStatus = new Map<number, 'late' | 'ontime'>();
+  const dayInfo = new Map<number, DayInfo>();
   for (const r of userRecords) {
     const day = parseInt(r.date.split('-')[2], 10);
     const lateness = calculateLateness(r.checkIn, workStart);
-    dayStatus.set(day, lateness.late ? 'late' : 'ontime');
+    dayInfo.set(day, {
+      status: lateness.late ? 'late' : 'ontime',
+      checkIn: r.checkIn,
+      checkOut: r.checkOut,
+    });
   }
 
   const cells: (number | null)[] = [];
@@ -72,21 +82,17 @@ export default function UserMonthGrid({ year, month, userId, workStart }: Props)
 
       <div className="grid grid-cols-7 gap-0.5 text-center text-xs">
         {cells.map((day, idx) => {
-          if (day === null) return <div key={`e${idx}`} className="py-1.5" />;
+          if (day === null) return <div key={`e${idx}`} className="pt-1 pb-2" />;
 
-          const status = dayStatus.get(day);
+          const info = dayInfo.get(day);
           const todayRing = isToday(day) ? 'ring-2 ring-indigo-500' : '';
           const weekend = isWeekend(day);
 
           let cellColors: string;
-          let dotColor: string | null = null;
-
-          if (status === 'ontime') {
+          if (info?.status === 'ontime') {
             cellColors = 'bg-emerald-100 text-emerald-700 font-semibold hover:bg-emerald-200';
-            dotColor = 'bg-emerald-500';
-          } else if (status === 'late') {
+          } else if (info?.status === 'late') {
             cellColors = 'bg-red-100 text-red-700 font-semibold hover:bg-red-200';
-            dotColor = 'bg-red-500';
           } else if (weekend) {
             cellColors = 'text-slate-400 hover:bg-slate-100';
           } else {
@@ -98,13 +104,20 @@ export default function UserMonthGrid({ year, month, userId, workStart }: Props)
               key={day}
               type="button"
               onClick={() => handleDayClick(day)}
-              className={`relative py-1.5 rounded-md cursor-pointer transition-colors ${cellColors} ${todayRing}`}
+              className={`pt-1 pb-1.5 rounded-md cursor-pointer transition-colors leading-tight ${cellColors} ${todayRing}`}
             >
-              {day}
-              {dotColor && (
-                <span
-                  className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${dotColor}`}
-                />
+              <span className="block">{day}</span>
+              {info ? (
+                <>
+                  <span className="block text-[9px] font-mono mt-0.5 opacity-90">
+                    {info.checkIn}
+                  </span>
+                  <span className="block text-[9px] font-mono text-slate-400">
+                    {info.checkOut ?? '—'}
+                  </span>
+                </>
+              ) : (
+                <span className="block text-[9px] opacity-0">{'00:00'}</span>
               )}
             </button>
           );
