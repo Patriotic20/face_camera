@@ -26,43 +26,62 @@ function formatToday(d: Date): string {
   return `${d.getDate()} ${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`;
 }
 
-type Tone = 'green' | 'blue' | 'red' | 'gray' | 'purple' | 'amber';
+type StripeColor = 'emerald' | 'indigo' | 'red' | 'slate' | 'violet' | 'amber';
 
-const TONES: Record<Tone, string> = {
-  green: 'bg-green-50 text-green-700',
-  blue: 'bg-blue-50 text-blue-700',
-  red: 'bg-red-50 text-red-700',
-  gray: 'bg-gray-100 text-gray-700',
-  purple: 'bg-purple-50 text-purple-700',
-  amber: 'bg-amber-50 text-amber-700',
+const STRIPES: Record<StripeColor, string> = {
+  emerald: 'bg-emerald-500',
+  indigo: 'bg-indigo-500',
+  red: 'bg-red-500',
+  slate: 'bg-slate-400',
+  violet: 'bg-violet-500',
+  amber: 'bg-amber-500',
+};
+
+const TINTED_BG: Record<StripeColor, string> = {
+  emerald: 'bg-emerald-50',
+  indigo: 'bg-indigo-50',
+  red: 'bg-red-50',
+  slate: 'bg-slate-50',
+  violet: 'bg-violet-50',
+  amber: 'bg-amber-50',
+};
+
+const VALUE_COLORS: Record<StripeColor, string> = {
+  emerald: 'text-emerald-700',
+  indigo: 'text-indigo-700',
+  red: 'text-red-700',
+  slate: 'text-slate-600',
+  violet: 'text-violet-700',
+  amber: 'text-amber-700',
 };
 
 function StatCard({
   label,
   value,
-  tone,
+  stripe,
   hint,
+  tinted,
 }: {
   label: string;
   value: number | string;
-  tone: Tone;
+  stripe: StripeColor;
   hint?: string;
+  tinted?: boolean;
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <div className="text-sm text-gray-500">{label}</div>
-      <div className={`mt-2 inline-block px-3 py-1 rounded-lg text-2xl font-bold ${TONES[tone]}`}>
-        {value}
-      </div>
-      {hint && <div className="mt-2 text-xs text-gray-400">{hint}</div>}
+    <div className={`rounded-xl shadow-sm ring-1 ring-slate-200/60 p-5 overflow-hidden relative ${tinted ? TINTED_BG[stripe] : 'bg-white'}`}>
+      <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-xl ${STRIPES[stripe]}`} />
+      <div className="text-sm text-slate-500 mt-1">{label}</div>
+      <div className={`mt-2 text-3xl font-bold ${VALUE_COLORS[stripe]}`}>{value}</div>
+      {hint && <div className="mt-1.5 text-xs text-slate-400">{hint}</div>}
     </div>
   );
 }
 
 function Panel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-5">
-      <h2 className="font-semibold text-gray-900 mb-4">{title}</h2>
+    <div className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200/60 p-5">
+      <h2 className="font-semibold text-slate-800 mb-4">{title}</h2>
       {children}
     </div>
   );
@@ -80,11 +99,11 @@ export default function Dashboard() {
     <section className="space-y-6">
       <header className="flex items-end justify-between flex-wrap gap-2">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Boshqaruv paneli</h1>
-          <p className="text-gray-600 mt-1">Tizim umumiy holati</p>
+          <h1 className="text-2xl font-bold text-slate-800">Boshqaruv paneli</h1>
+          <p className="text-slate-500 mt-1 text-sm">Tizim umumiy holati</p>
         </div>
-        <div className="text-sm text-gray-500">
-          {formatToday(new Date())} • Ish vaqti: <span className="font-mono">{workStart}</span>
+        <div className="text-sm text-slate-400">
+          {formatToday(new Date())} • Ish vaqti: <span className="font-mono text-slate-500">{workStart}</span>
         </div>
       </header>
 
@@ -92,25 +111,25 @@ export default function Dashboard() {
         <StatCard
           label="Hozir ishda"
           value={today.atWork}
-          tone="green"
+          stripe="emerald"
           hint="Kirgan, hali chiqmagan"
         />
         <StatCard
           label="Bugun keldi"
           value={today.cameToday}
-          tone="blue"
+          stripe="indigo"
           hint={`${today.onTime} vaqtida + ${today.late} kech`}
         />
         <StatCard
           label="Kech keldi"
           value={today.late}
-          tone="red"
+          stripe="red"
           hint="Bugun ish vaqtidan keyin"
         />
         <StatCard
           label="Kelmagan"
           value={today.absent}
-          tone="gray"
+          stripe="slate"
           hint="Bugun yozuvi yo'q"
         />
       </div>
@@ -120,17 +139,18 @@ export default function Dashboard() {
           <Panel title="Oxirgi 7 kun davomati">
             <ResponsiveContainer width="100%" height={250}>
               <BarChart data={last7} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                <XAxis dataKey="date" stroke="#6b7280" fontSize={12} />
-                <YAxis stroke="#6b7280" fontSize={12} allowDecimals={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis dataKey="date" stroke="#94a3b8" fontSize={12} />
+                <YAxis stroke="#94a3b8" fontSize={12} allowDecimals={false} />
                 <Tooltip
                   contentStyle={{
                     borderRadius: 8,
-                    border: '1px solid #e5e7eb',
+                    border: '1px solid #e2e8f0',
                     fontSize: 13,
+                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
                   }}
                 />
-                <Bar dataKey="count" fill="#3b82f6" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="count" fill="#6366f1" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </Panel>
@@ -139,20 +159,20 @@ export default function Dashboard() {
         <Panel title="Bu oy ko'rsatkichlari">
           <dl className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
-              <dt className="text-gray-500">Jami davomat</dt>
-              <dd className="font-semibold text-gray-900">{month.totalRecords}</dd>
+              <dt className="text-slate-500">Jami davomat</dt>
+              <dd className="font-semibold text-slate-800">{month.totalRecords}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-gray-500">Jami kechikish</dt>
+              <dt className="text-slate-500">Jami kechikish</dt>
               <dd className="font-semibold text-red-600">{month.totalLate}</dd>
             </div>
-            <div className="flex items-center justify-between border-t border-gray-100 pt-3">
-              <dt className="text-gray-500">Eng punktual</dt>
-              <dd className="font-medium text-green-700 text-right">
+            <div className="flex items-center justify-between border-t border-slate-100 pt-3">
+              <dt className="text-slate-500">Eng punktual</dt>
+              <dd className="font-medium text-emerald-700 text-right">
                 {month.mostPunctual ? (
                   <>
                     {month.mostPunctual.name}
-                    <span className="text-gray-400 ml-1 font-normal">
+                    <span className="text-slate-400 ml-1 font-normal">
                       ({month.mostPunctual.count})
                     </span>
                   </>
@@ -162,12 +182,12 @@ export default function Dashboard() {
               </dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="text-gray-500">Eng kech</dt>
+              <dt className="text-slate-500">Eng kech</dt>
               <dd className="font-medium text-red-700 text-right">
                 {month.mostLate ? (
                   <>
                     {month.mostLate.name}
-                    <span className="text-gray-400 ml-1 font-normal">
+                    <span className="text-slate-400 ml-1 font-normal">
                       ({month.mostLate.count})
                     </span>
                   </>
@@ -183,7 +203,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Panel title={`Bugun kech kelganlar (${today.lateRecords.length})`}>
           {today.lateRecords.length === 0 ? (
-            <p className="text-sm text-gray-500">Bugun hech kim kech kelmagan</p>
+            <p className="text-sm text-slate-400">Bugun hech kim kech kelmagan</p>
           ) : (
             <ul className="space-y-2">
               {today.lateRecords.map(({ record, minutes }) => (
@@ -191,10 +211,10 @@ export default function Dashboard() {
                   key={record.id}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="text-gray-900">{record.userName}</span>
+                  <span className="text-slate-700">{record.userName}</span>
                   <span className="inline-flex items-center gap-2">
-                    <span className="text-gray-400 font-mono text-xs">{record.checkIn}</span>
-                    <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                    <span className="text-slate-400 font-mono text-xs">{record.checkIn}</span>
+                    <span className="px-2 py-0.5 bg-red-100 text-red-700 rounded-lg text-xs font-medium">
                       {minutes} daqiqa kech
                     </span>
                   </span>
@@ -206,7 +226,7 @@ export default function Dashboard() {
 
         <Panel title={`Bugun kelmaganlar (${today.absentUsers.length})`}>
           {today.absentUsers.length === 0 ? (
-            <p className="text-sm text-gray-500">Hamma keldi 🎉</p>
+            <p className="text-sm text-slate-400">Hamma keldi</p>
           ) : (
             <ul className="space-y-2">
               {today.absentUsers.map((u) => (
@@ -214,8 +234,8 @@ export default function Dashboard() {
                   key={u.id}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="text-gray-900">{u.name}</span>
-                  <span className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">
+                  <span className="text-slate-700">{u.name}</span>
+                  <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-lg text-xs">
                     Kelmagan
                   </span>
                 </li>
@@ -226,10 +246,10 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Jami xodim" value={USERS.length} tone="purple" />
-        <StatCard label="Jami kamera" value={cameras.total} tone="blue" />
-        <StatCard label="Ulangan" value={cameras.connected} tone="green" />
-        <StatCard label="Ulanmagan" value={cameras.disconnected} tone="amber" />
+        <StatCard label="Jami xodim" value={USERS.length} stripe="violet" tinted />
+        <StatCard label="Jami kamera" value={cameras.total} stripe="indigo" tinted />
+        <StatCard label="Ulangan" value={cameras.connected} stripe="emerald" tinted />
+        <StatCard label="Ulanmagan" value={cameras.disconnected} stripe="amber" tinted />
       </div>
     </section>
   );

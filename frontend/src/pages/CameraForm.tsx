@@ -75,22 +75,25 @@ export default function CameraForm() {
   };
 
   return (
-    <section className="max-w-2xl space-y-6">
+    <section className="space-y-6">
       <header className="space-y-2">
         <Link
           to="/cameras"
-          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-indigo-600 transition-colors"
         >
-          ← Kameralarga qaytish
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Kameralarga qaytish
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-slate-800">
           {isEdit ? 'Kamerani tahrirlash' : 'Yangi kamera'}
         </h1>
       </header>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl border border-gray-200 p-6 space-y-4"
+        className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200/60 p-6 space-y-4 max-w-lg"
       >
         <Field label="Nom">
           <input
@@ -98,7 +101,7 @@ export default function CameraForm() {
             value={form.name}
             onChange={(e) => update('name', e.target.value)}
             placeholder="Masalan: Asosiy kirish"
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </Field>
 
@@ -108,7 +111,7 @@ export default function CameraForm() {
             value={form.ip}
             onChange={(e) => update('ip', e.target.value)}
             placeholder="192.168.1.100"
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </Field>
 
@@ -119,7 +122,7 @@ export default function CameraForm() {
               value={form.login}
               onChange={(e) => update('login', e.target.value)}
               autoComplete="off"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </Field>
 
@@ -129,7 +132,7 @@ export default function CameraForm() {
               value={form.password}
               onChange={(e) => update('password', e.target.value)}
               autoComplete="new-password"
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
             />
           </Field>
         </div>
@@ -138,7 +141,7 @@ export default function CameraForm() {
           <select
             value={form.type}
             onChange={(e) => update('type', e.target.value as CameraType)}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
           >
             <option value="enter">Kirish</option>
             <option value="exit">Chiqish</option>
@@ -146,7 +149,7 @@ export default function CameraForm() {
         </Field>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded px-3 py-2">
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2.5">
             {error}
           </div>
         )}
@@ -154,13 +157,13 @@ export default function CameraForm() {
         <div className="flex gap-2 pt-2">
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium shadow-sm"
           >
             Saqlash
           </button>
           <Link
             to="/cameras"
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+            className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors text-sm font-medium"
           >
             Bekor qilish
           </Link>
@@ -173,7 +176,7 @@ export default function CameraForm() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-sm font-medium text-gray-700 mb-1">{label}</span>
+      <span className="block text-sm font-medium text-slate-700 mb-1.5">{label}</span>
       {children}
     </label>
   );

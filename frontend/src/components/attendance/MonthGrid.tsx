@@ -30,6 +30,11 @@ export default function MonthGrid({ year, month }: Props) {
     today.getMonth() === month &&
     today.getDate() === d;
 
+  const isWeekend = (d: number) => {
+    const dow = new Date(year, month, d).getDay();
+    return dow === 0 || dow === 6;
+  };
+
   const cells: (number | null)[] = [];
   for (let i = 0; i < offset; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
@@ -40,12 +45,12 @@ export default function MonthGrid({ year, month }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <h3 className="text-center font-semibold text-gray-900 mb-3">
+    <div>
+      <h3 className="text-center text-xs font-semibold text-slate-700 uppercase tracking-wide mb-3">
         {MONTH_NAMES[month]}
       </h3>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-1">
+      <div className="grid grid-cols-7 gap-0.5 text-center text-xs text-slate-400 mb-1">
         {WEEKDAYS.map((w) => (
           <div key={w} className="py-1 font-medium">
             {w}
@@ -53,7 +58,7 @@ export default function MonthGrid({ year, month }: Props) {
         ))}
       </div>
 
-      <div className="grid grid-cols-7 gap-1 text-center text-sm">
+      <div className="grid grid-cols-7 gap-0.5 text-center text-xs">
         {cells.map((day, idx) => {
           if (day === null) {
             return <div key={`e${idx}`} className="py-1.5" />;
@@ -62,12 +67,15 @@ export default function MonthGrid({ year, month }: Props) {
           const date = new Date(year, month, day);
           const has = hasRecordsOnDate(date);
           const today_ = isToday(day);
+          const weekend = isWeekend(day);
 
-          const base = 'relative py-1.5 rounded cursor-pointer transition-colors';
+          const base = 'relative py-1.5 rounded-md cursor-pointer transition-colors';
           const colors = has
-            ? 'bg-blue-100 text-blue-700 font-medium hover:bg-blue-200'
-            : 'text-gray-700 hover:bg-gray-100';
-          const ring = today_ ? 'ring-2 ring-blue-500' : '';
+            ? 'bg-indigo-100 text-indigo-700 font-semibold hover:bg-indigo-200'
+            : weekend
+            ? 'text-slate-400 hover:bg-slate-100'
+            : 'text-slate-600 hover:bg-slate-100';
+          const ring = today_ ? 'ring-2 ring-indigo-500' : '';
 
           return (
             <button
@@ -78,7 +86,7 @@ export default function MonthGrid({ year, month }: Props) {
             >
               {day}
               {has && (
-                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-blue-600" />
+                <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-indigo-500" />
               )}
             </button>
           );

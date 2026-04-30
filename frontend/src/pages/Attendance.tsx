@@ -8,24 +8,24 @@ export default function Attendance() {
     <section className="space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Davomat</h1>
-          <p className="text-gray-600 mt-1">Kunni tanlab, davomat yozuvlarini ko'ring</p>
+          <h1 className="text-2xl font-bold text-slate-800">Davomat</h1>
+          <p className="text-slate-500 mt-1 text-sm">Kunni tanlab, davomat yozuvlarini ko'ring</p>
         </div>
 
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-lg p-1">
+        <div className="flex items-center gap-1 bg-white ring-1 ring-slate-200/60 shadow-sm rounded-lg p-1">
           <button
             type="button"
             onClick={() => setYear((y) => y - 1)}
-            className="px-3 py-1.5 rounded hover:bg-gray-100 text-gray-700 transition-colors"
+            className="px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition-colors text-sm"
             aria-label="Oldingi yil"
           >
             &lt;
           </button>
-          <span className="px-4 font-semibold text-gray-900 tabular-nums">{year}</span>
+          <span className="px-4 font-semibold text-slate-800 tabular-nums text-sm">{year}</span>
           <button
             type="button"
             onClick={() => setYear((y) => y + 1)}
-            className="px-3 py-1.5 rounded hover:bg-gray-100 text-gray-700 transition-colors"
+            className="px-3 py-1.5 rounded-md hover:bg-slate-100 text-slate-600 transition-colors text-sm"
             aria-label="Keyingi yil"
           >
             &gt;
@@ -33,7 +33,9 @@ export default function Attendance() {
         </div>
       </header>
 
-      <YearCalendar year={year} />
+      <div className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200/60 p-6">
+        <YearCalendar year={year} />
+      </div>
     </section>
   );
 }

@@ -58,15 +58,18 @@ export default function AttendanceDay() {
       <header className="space-y-2">
         <Link
           to="/attendance"
-          className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-indigo-600 transition-colors"
         >
-          ← Kalendarga qaytish
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Kalendarga qaytish
         </Link>
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-slate-800">
           {formatDateLabel(date)}
         </h1>
-        <p className="text-gray-600">
-          Jami: {records.length} ta yozuv
+        <p className="text-slate-500 text-sm">
+          Jami: <span className="font-medium text-slate-700">{records.length}</span> ta yozuv
           {lateCount > 0 && (
             <>
               {' • '}
@@ -78,9 +81,9 @@ export default function AttendanceDay() {
         </p>
       </header>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-wrap items-center gap-4">
-        <div className="flex items-center gap-2">
-          <label htmlFor="work-start" className="text-sm font-medium text-gray-700">
+      <div className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200/60 p-4 flex flex-wrap items-center gap-4">
+        <div className="flex items-center gap-2.5">
+          <label htmlFor="work-start" className="text-sm font-medium text-slate-600">
             Ish boshlanish vaqti:
           </label>
           <input
@@ -88,7 +91,7 @@ export default function AttendanceDay() {
             type="time"
             value={workStart}
             onChange={(e) => setWorkStart(e.target.value)}
-            className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-slate-300 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
           />
         </div>
 
@@ -99,36 +102,36 @@ export default function AttendanceDay() {
             type="button"
             onClick={handleExportDay}
             disabled={records.length === 0}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium disabled:bg-slate-300 disabled:cursor-not-allowed"
           >
             Kunlik Excel
           </button>
           <button
             type="button"
             onClick={handleExportMonth}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
           >
             Oylik Excel
           </button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm ring-1 ring-slate-200/60 overflow-hidden">
         <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Foydalanuvchi</th>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Kirish</th>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Kirish kamerasi</th>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Chiqish</th>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Chiqish kamerasi</th>
-              <th className="px-4 py-3 text-xs font-semibold text-gray-600 uppercase">Holat</th>
+              <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Foydalanuvchi</th>
+              <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Kirish</th>
+              <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Kirish kamerasi</th>
+              <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Chiqish</th>
+              <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Chiqish kamerasi</th>
+              <th className="px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Holat</th>
             </tr>
           </thead>
           <tbody>
             {records.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-500">
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-400">
                   Bu kuni davomat yozuvlari yo'q
                 </td>
               </tr>
@@ -138,24 +141,24 @@ export default function AttendanceDay() {
                 const enterCam = getCamera(r.enterCameraId);
                 const exitCam = getCamera(r.exitCameraId);
                 return (
-                  <tr key={r.id} className="border-b border-gray-100 last:border-0">
-                    <td className="px-4 py-3 text-sm text-gray-900">{r.userName}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700 tabular-nums">{r.checkIn}</td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {enterCam ? enterCam.name : <span className="text-gray-400">—</span>}
+                  <tr key={r.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors">
+                    <td className="px-4 py-3 text-sm font-medium text-slate-800">{r.userName}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600 tabular-nums font-mono">{r.checkIn}</td>
+                    <td className="px-4 py-3 text-sm text-slate-600">
+                      {enterCam ? enterCam.name : <span className="text-slate-300">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700 tabular-nums">
-                      {r.checkOut ?? <span className="text-gray-400">—</span>}
+                    <td className="px-4 py-3 text-sm text-slate-600 tabular-nums font-mono">
+                      {r.checkOut ?? <span className="text-slate-300">—</span>}
                     </td>
-                    <td className="px-4 py-3 text-sm text-gray-700">
-                      {exitCam ? exitCam.name : <span className="text-gray-400">—</span>}
+                    <td className="px-4 py-3 text-sm text-slate-600">
+                      {exitCam ? exitCam.name : <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span
-                        className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-block px-2.5 py-0.5 rounded-lg text-xs font-medium ${
                           lateness.late
                             ? 'bg-red-100 text-red-700'
-                            : 'bg-green-100 text-green-700'
+                            : 'bg-emerald-100 text-emerald-700'
                         }`}
                       >
                         {lateness.label}
