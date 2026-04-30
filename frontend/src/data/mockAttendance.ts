@@ -1,6 +1,6 @@
 import type { AttendanceRecord } from '../types/attendance';
 import { getCameras } from './camerasStorage';
-import { USERS } from './users';
+import { USERS, userFullName } from './users';
 
 const pad = (n: number) => String(n).padStart(2, '0');
 const formatDate = (d: Date) =>
@@ -42,7 +42,7 @@ function generateRecords(): AttendanceRecord[] {
       records.push({
         id: `r${idCounter++}`,
         userId: user.id,
-        userName: user.name,
+        userName: userFullName(user),
         date: formatDate(day),
         checkIn: `${pad(inHour)}:${pad(inMin)}`,
         checkOut: hasCheckOut ? `${pad(outHour)}:${pad(outMin)}` : null,
@@ -66,7 +66,7 @@ function generateRecords(): AttendanceRecord[] {
     records.push({
       id: `r${idCounter++}`,
       userId: user.id,
-      userName: user.name,
+      userName: userFullName(user),
       date: formatDate(today),
       checkIn: `${pad(inHour)}:${pad(inMin)}`,
       checkOut: stillInside ? null : `${pad(outHour)}:${pad(outMin)}`,

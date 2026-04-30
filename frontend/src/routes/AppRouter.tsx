@@ -2,6 +2,8 @@ import { createBrowserRouter } from 'react-router-dom';
 import Layout from '../components/Layout';
 import Dashboard from '../pages/Dashboard';
 import Users from '../pages/Users';
+import UserForm from '../pages/UserForm';
+import UserAttendance from '../pages/UserAttendance';
 import Attendance from '../pages/Attendance';
 import AttendanceDay from '../pages/AttendanceDay';
 import Cameras from '../pages/Cameras';
@@ -15,6 +17,9 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Dashboard /> },
       { path: 'users', element: <Users /> },
+      { path: 'users/new', element: <UserForm /> },
+      { path: 'users/:id', element: <UserAttendance /> },
+      { path: 'users/:id/edit', element: <UserForm /> },
       { path: 'attendance', element: <Attendance /> },
       { path: 'attendance/:date', element: <AttendanceDay /> },
       { path: 'cameras', element: <Cameras /> },

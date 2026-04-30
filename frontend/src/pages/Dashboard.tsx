@@ -9,7 +9,7 @@ import {
 } from 'recharts';
 import type { ReactNode } from 'react';
 import { useWorkStartTime } from '../hooks/useWorkStartTime';
-import { USERS } from '../data/users';
+import { USERS, userFullName } from '../data/users';
 import {
   getTodayStats,
   getMonthStats,
@@ -234,7 +234,7 @@ export default function Dashboard() {
                   key={u.id}
                   className="flex items-center justify-between text-sm"
                 >
-                  <span className="text-slate-700">{u.name}</span>
+                  <span className="text-slate-700">{userFullName(u)}</span>
                   <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-lg text-xs">
                     Kelmagan
                   </span>
