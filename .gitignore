@@ -30,4 +30,12 @@ dist-ssr
 
 
 backend/.venv
-backend/__pycache__
+backend/*__pycache__
+
+# Python
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.py[cod]
+*$py.class
