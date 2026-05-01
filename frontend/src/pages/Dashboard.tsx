@@ -10,6 +10,7 @@ import {
 import { useEffect, useState, type ReactNode } from 'react';
 import { useWorkStartTime } from '../hooks/useWorkStartTime';
 import { getAttendanceRecords } from '../data/attendanceApi';
+import { getCameraList } from '../data/cameraApi';
 import {
   getTodayStats,
   getMonthStats,
@@ -17,6 +18,7 @@ import {
   getCameraStats,
 } from '../utils/dashboardStats';
 import type { AttendanceRecord } from '../types/attendance';
+import type { Camera } from '../types/camera';
 
 const MONTH_NAMES = [
   'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
@@ -91,25 +93,17 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
 export default function Dashboard() {
   const [workStart] = useWorkStartTime();
   const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [cameraList, setCameraList] = useState<Camera[]>([]);
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const data = await getAttendanceRecords();
-        setRecords(data);
-      } catch (error) {
-        console.error('Failed to fetch attendance records:', error);
-        setRecords([]);
-      }
-    };
-
-    fetchRecords();
+    getAttendanceRecords().then(setRecords).catch(() => setRecords([]));
+    getCameraList().then(setCameraList).catch(() => setCameraList([]));
   }, []);
 
   const today = getTodayStats(workStart, records);
   const month = getMonthStats(workStart, records);
   const last7 = getLast7DaysCounts(records);
-  const cameras = getCameraStats();
+  const cameras = getCameraStats(cameraList);
 
   return (
     <section className="space-y-6">

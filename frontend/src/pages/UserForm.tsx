@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
-import { addUser, getUser, updateUser } from '../data/usersStorage';
+import { getEmployeeById, createEmployee, updateEmployeeById } from '../data/employeeApi';
 
 type FormState = {
   firstName: string;
@@ -28,16 +28,17 @@ export default function UserForm() {
 
   useEffect(() => {
     if (!id) return;
-    const user = getUser(id);
-    if (!user) {
-      setNotFound(true);
-      return;
-    }
-    setForm({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      thirdName: user.thirdName,
-      active: user.active,
+    getEmployeeById(id).then((employee) => {
+      if (!employee) {
+        setNotFound(true);
+        return;
+      }
+      setForm({
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        thirdName: employee.thirdName,
+        active: employee.active,
+      });
     });
   }, [id]);
 
@@ -47,7 +48,7 @@ export default function UserForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -55,9 +56,9 @@ export default function UserForm() {
     if (!form.firstName.trim()) return setError("Ismni kiriting");
 
     if (isEdit && id) {
-      updateUser(id, form);
+      await updateEmployeeById(id, form);
     } else {
-      addUser(form);
+      await createEmployee(form);
     }
     navigate('/users');
   };

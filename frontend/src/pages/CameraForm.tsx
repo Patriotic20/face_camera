@@ -1,11 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
-import {
-  addCamera,
-  getCamera,
-  updateCamera,
-} from '../data/camerasStorage';
+import { getCameraById, createCamera, updateCameraById } from '../data/cameraApi';
 import type { CameraType } from '../types/camera';
 
 const IPV4_RE = /^((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)$/;
@@ -37,17 +33,18 @@ export default function CameraForm() {
 
   useEffect(() => {
     if (!id) return;
-    const cam = getCamera(id);
-    if (!cam) {
-      setNotFound(true);
-      return;
-    }
-    setForm({
-      name: cam.name,
-      ip: cam.ip,
-      login: cam.login,
-      password: cam.password,
-      type: cam.type,
+    getCameraById(id).then((cam) => {
+      if (!cam) {
+        setNotFound(true);
+        return;
+      }
+      setForm({
+        name: cam.name,
+        ip: cam.ip,
+        login: cam.login,
+        password: '',
+        type: cam.type,
+      });
     });
   }, [id]);
 
@@ -57,19 +54,19 @@ export default function CameraForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (!form.name.trim()) return setError("Nomni kiriting");
     if (!IPV4_RE.test(form.ip)) return setError("To'g'ri IP adresni kiriting (masalan, 192.168.1.100)");
     if (!form.login.trim()) return setError("Loginni kiriting");
-    if (!form.password) return setError("Parolni kiriting");
+    if (!isEdit && !form.password) return setError("Parolni kiriting");
 
     if (isEdit && id) {
-      updateCamera(id, form);
+      await updateCameraById(id, form);
     } else {
-      addCamera({ ...form, connected: false });
+      await createCamera(form);
     }
     navigate('/cameras');
   };
@@ -126,7 +123,7 @@ export default function CameraForm() {
             />
           </Field>
 
-          <Field label="Parol">
+          <Field label={isEdit ? 'Yangi parol (ixtiyoriy)' : 'Parol'}>
             <input
               type="password"
               value={form.password}

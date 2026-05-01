@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { getUser } from '../data/usersStorage';
-import { userFullName } from '../data/users';
+import { getEmployeeById } from '../data/employeeApi';
+import { userFullName, type User } from '../data/users';
 import { getAttendanceByPerson } from '../data/attendanceApi';
 import { useWorkStartTime } from '../hooks/useWorkStartTime';
 import { calculateLateness } from '../utils/lateness';
@@ -13,25 +13,23 @@ export default function UserAttendance() {
   const [workStart] = useWorkStartTime();
   const [year, setYear] = useState(new Date().getFullYear());
   const [userRecords, setUserRecords] = useState<AttendanceRecord[]>([]);
-
-  if (!id) return <Navigate to="/users" replace />;
-
-  const user = getUser(id);
-  if (!user) return <Navigate to="/users" replace />;
+  const [user, setUser] = useState<User | null | undefined>(undefined);
 
   useEffect(() => {
-    const fetchUserRecords = async () => {
-      try {
-        const records = await getAttendanceByPerson(id);
-        setUserRecords(records);
-      } catch (error) {
-        console.error('Failed to fetch user attendance records:', error);
-        setUserRecords([]);
-      }
-    };
-
-    fetchUserRecords();
+    if (!id) return;
+    getEmployeeById(id).then((emp) => setUser(emp ?? null));
   }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    getAttendanceByPerson(id)
+      .then(setUserRecords)
+      .catch(() => setUserRecords([]));
+  }, [id]);
+
+  if (!id) return <Navigate to="/users" replace />;
+  if (user === undefined) return null;
+  if (user === null) return <Navigate to="/users" replace />;
 
   const lateCount = userRecords.filter(
     (r) => calculateLateness(r.checkIn, workStart).late,

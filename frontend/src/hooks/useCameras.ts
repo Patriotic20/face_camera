@@ -1,13 +1,17 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import type { Camera } from '../types/camera';
-import { getCameras } from '../data/camerasStorage';
+import { getCameraList } from '../data/cameraApi';
 
 export function useCameras() {
-  const [cameras, setCameras] = useState<Camera[]>(() => getCameras());
+  const [cameras, setCameras] = useState<Camera[]>([]);
 
   const refresh = useCallback(() => {
-    setCameras(getCameras());
+    getCameraList().then(setCameras);
   }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   return { cameras, refresh };
 }

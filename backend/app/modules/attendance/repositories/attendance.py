@@ -10,6 +10,13 @@ class AttendanceRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
+    def _base_query(self):
+        return select(Attendance).options(
+            selectinload(Attendance.employee),
+            selectinload(Attendance.enter_camera),
+            selectinload(Attendance.exit_camera),
+        )
+
     async def create_attendance(self, data: AttendanceCreate) -> Attendance:
         try:
             new_attendance = Attendance(**data.model_dump())
@@ -22,26 +29,33 @@ class AttendanceRepository:
             raise
 
     async def get_all_attendances(self) -> list[Attendance]:
-        result = await self.session.execute(
-            select(Attendance).options(
-                selectinload(Attendance.employee),
-                selectinload(Attendance.enter_camera),
-                selectinload(Attendance.exit_camera),
-            )
-        )
+        result = await self.session.execute(self._base_query())
         return result.scalars().all()
 
     async def get_attendance_by_id(self, attendance_id: int) -> Attendance | None:
         result = await self.session.execute(
-            select(Attendance)
-            .where(Attendance.id == attendance_id)
-            .options(
-                selectinload(Attendance.employee),
-                selectinload(Attendance.enter_camera),
-                selectinload(Attendance.exit_camera),
-            )
+            self._base_query().where(Attendance.id == attendance_id)
         )
         return result.scalar_one_or_none()
+
+    async def get_attendances_by_employee(self, employee_id: int) -> list[Attendance]:
+        result = await self.session.execute(
+            self._base_query().where(Attendance.employee_id == employee_id)
+        )
+        return result.scalars().all()
+
+    async def get_attendances_by_date(self, date: str) -> list[Attendance]:
+        result = await self.session.execute(
+            self._base_query().where(Attendance.enter_time.startswith(date))
+        )
+        return result.scalars().all()
+
+    async def get_attendances_by_month(self, year: int, month: int) -> list[Attendance]:
+        prefix = f"{year}-{month:02d}"
+        result = await self.session.execute(
+            self._base_query().where(Attendance.enter_time.startswith(prefix))
+        )
+        return result.scalars().all()
 
     async def exists(self, employee_id: int, enter_time: str) -> bool:
         result = await self.session.execute(
@@ -51,17 +65,6 @@ class AttendanceRepository:
             )
         )
         return result.scalar_one_or_none() is not None
-
-    async def get_attendances_by_employee(self, employee_id: int) -> list[Attendance]:
-        result = await self.session.execute(
-            select(Attendance)
-            .where(Attendance.employee_id == employee_id)
-            .options(
-                selectinload(Attendance.enter_camera),
-                selectinload(Attendance.exit_camera),
-            )
-        )
-        return result.scalars().all()
 
     async def update_attendance(self, attendance_id: int, data: AttendanceUpdate) -> Attendance | None:
         attendance = await self.get_attendance_by_id(attendance_id)

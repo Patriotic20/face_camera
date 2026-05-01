@@ -1,21 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getUsers, deleteUser } from '../data/usersStorage';
+import { getEmployees, deleteEmployeeById } from '../data/employeeApi';
 import { userFullName, type User } from '../data/users';
 
 export default function Users() {
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>(() => getUsers());
+  const [users, setUsers] = useState<User[]>([]);
 
-  const refresh = () => setUsers(getUsers());
+  const refresh = () => {
+    getEmployees().then(setUsers);
+  };
 
-  const handleDelete = (e: React.MouseEvent, user: User) => {
+  useEffect(() => {
+    refresh();
+  }, []);
+
+  const handleDelete = async (e: React.MouseEvent, user: User) => {
     e.stopPropagation();
     const ok = window.confirm(
       `"${userFullName(user)}" foydalanuvchisini o'chirishni xohlaysizmi?`,
     );
     if (!ok) return;
-    deleteUser(user.id);
+    await deleteEmployeeById(user.id);
     refresh();
   };
 

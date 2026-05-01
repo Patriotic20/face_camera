@@ -1,5 +1,5 @@
 import type { AttendanceRecord } from '../types/attendance';
-import { getCameras } from '../data/camerasStorage';
+import type { Camera } from '../types/camera';
 import { calculateLateness } from './lateness';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -116,8 +116,7 @@ export type CameraStats = {
   disconnected: number;
 };
 
-export function getCameraStats(): CameraStats {
-  const cameras = getCameras();
+export function getCameraStats(cameras: Camera[]): CameraStats {
   return {
     total: cameras.length,
     connected: cameras.filter((c) => c.connected).length,

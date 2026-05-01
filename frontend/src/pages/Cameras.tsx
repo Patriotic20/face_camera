@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCameras } from '../hooks/useCameras';
-import { deleteCamera } from '../data/camerasStorage';
+import { deleteCameraById } from '../data/cameraApi';
 import type { Camera } from '../types/camera';
 
 const TYPE_LABEL: Record<Camera['type'], string> = {
@@ -16,10 +16,10 @@ const TYPE_BADGE: Record<Camera['type'], string> = {
 export default function Cameras() {
   const { cameras, refresh } = useCameras();
 
-  const handleDelete = (cam: Camera) => {
+  const handleDelete = async (cam: Camera) => {
     const ok = window.confirm(`"${cam.name}" kamerasini o'chirishni xohlaysizmi?`);
     if (!ok) return;
-    deleteCamera(cam.id);
+    await deleteCameraById(cam.id);
     refresh();
   };
 

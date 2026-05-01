@@ -30,3 +30,25 @@ class AttendanceResponse(AttendanceBase):
     working_hours: Optional[float]
     created_at: datetime
     updated_at: datetime
+
+
+class EmployeeBasicInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    first_name: str
+    last_name: str
+    third_name: Optional[str]
+
+
+class CameraBasicInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+
+
+class AttendanceDetailResponse(AttendanceResponse):
+    employee: EmployeeBasicInfo
+    enter_camera: CameraBasicInfo
+    exit_camera: Optional[CameraBasicInfo]

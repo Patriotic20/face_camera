@@ -6,5 +6,7 @@ export type AttendanceRecord = {
   checkIn: string;
   checkOut: string | null;
   enterCameraId: string | null;
+  enterCameraName: string | null;
   exitCameraId: string | null;
+  exitCameraName: string | null;
 };

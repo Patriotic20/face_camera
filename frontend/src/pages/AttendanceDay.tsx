@@ -1,7 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { getAttendanceForDate, getAttendanceForMonth } from '../data/attendanceApi';
-import { getCamera } from '../data/camerasStorage';
 import { useWorkStartTime } from '../hooks/useWorkStartTime';
 import { calculateLateness } from '../utils/lateness';
 import { exportToExcel } from '../utils/excelExport';
@@ -173,20 +172,18 @@ export default function AttendanceDay() {
             ) : (
               records.map((r) => {
                 const lateness = calculateLateness(r.checkIn, workStart);
-                const enterCam = getCamera(r.enterCameraId);
-                const exitCam = getCamera(r.exitCameraId);
                 return (
                   <tr key={r.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50/70 transition-colors">
                     <td className="px-4 py-3 text-sm font-medium text-slate-800">{r.userName}</td>
                     <td className="px-4 py-3 text-sm text-slate-600 tabular-nums font-mono">{r.checkIn}</td>
                     <td className="px-4 py-3 text-sm text-slate-600">
-                      {enterCam ? enterCam.name : <span className="text-slate-300">—</span>}
+                      {r.enterCameraName ?? <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-600 tabular-nums font-mono">
                       {r.checkOut ?? <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-4 py-3 text-sm text-slate-600">
-                      {exitCam ? exitCam.name : <span className="text-slate-300">—</span>}
+                      {r.exitCameraName ?? <span className="text-slate-300">—</span>}
                     </td>
                     <td className="px-4 py-3 text-sm">
                       <span

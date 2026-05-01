@@ -1,6 +1,5 @@
 import ExcelJS from 'exceljs';
 import type { AttendanceRecord } from '../types/attendance';
-import { getCamera } from '../data/camerasStorage';
 import { calculateLateness } from './lateness';
 
 export async function exportToExcel(
@@ -32,16 +31,14 @@ export async function exportToExcel(
 
   for (const r of records) {
     const lateness = calculateLateness(r.checkIn, workStart);
-    const enterCam = getCamera(r.enterCameraId);
-    const exitCam = getCamera(r.exitCameraId);
 
     const row = ws.addRow({
       date: r.date,
       userName: r.userName,
       checkIn: r.checkIn,
-      enterCamera: enterCam?.name ?? '—',
+      enterCamera: r.enterCameraName ?? '—',
       checkOut: r.checkOut ?? '—',
-      exitCamera: exitCam?.name ?? '—',
+      exitCamera: r.exitCameraName ?? '—',
       status: lateness.label,
     });
 
