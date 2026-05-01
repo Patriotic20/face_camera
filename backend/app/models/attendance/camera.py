@@ -2,6 +2,7 @@
 from app.models.base import Base
 from app.core.mixins.id_int_pk import IdIntPk
 from app.core.mixins.time_stamp_mixin import TimestampMixin
+
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import Enum
 from enum import Enum as PyEnum

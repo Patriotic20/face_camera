@@ -9,12 +9,15 @@ class Attendance(Base, IdIntPk, TimestampMixin):
     
     __tablename__ = "attendances"
 
-    user_id: Mapped[int] = mapped_column(nullable=False)
-    camera_id: Mapped[int] = mapped_column(nullable=False)
+    person_id: Mapped[int] = mapped_column(nullable=False)
+    enter_camera_id: Mapped[int] = mapped_column(nullable=False)
+    exit_camera_id: Mapped[int] = mapped_column(nullable=True)
     enter_time: Mapped[str] = mapped_column(nullable=False)
     exit_time: Mapped[str] = mapped_column(nullable=True)
+    status: Mapped[str] = mapped_column(nullable=False)  
     working_hours: Mapped[float] = mapped_column(nullable=True)  
     
     # Relationships
-    user = relationship("User", backref="attendances", lazy="joined")
-    camera = relationship("Camera", backref="attendances", lazy="joined")
+    person = relationship("Person", backref="attendances", lazy="joined")
+    enter_camera = relationship("Camera", foreign_keys=[enter_camera_id], backref="enter_attendances", lazy="joined")
+    exit_camera = relationship("Camera", foreign_keys=[exit_camera_id], backref="exit_attendances", lazy="joined")
