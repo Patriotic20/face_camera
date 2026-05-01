@@ -1,18 +1,16 @@
-import { USERS, type User } from './users';
+import type { User } from './users';
 
 const KEY = 'users';
 
 function read(): User[] {
   const raw = localStorage.getItem(KEY);
   if (!raw) {
-    localStorage.setItem(KEY, JSON.stringify(USERS));
-    return USERS;
+    return [];
   }
   try {
     return JSON.parse(raw) as User[];
   } catch {
-    localStorage.setItem(KEY, JSON.stringify(USERS));
-    return USERS;
+    return [];
   }
 }
 

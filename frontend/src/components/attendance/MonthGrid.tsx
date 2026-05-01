@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { hasRecordsOnDate } from '../../data/mockAttendance';
+import type { AttendanceRecord } from '../../types/attendance';
 
 const WEEKDAYS = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
 
@@ -13,9 +13,10 @@ const pad = (n: number) => String(n).padStart(2, '0');
 type Props = {
   year: number;
   month: number;
+  records: AttendanceRecord[];
 };
 
-export default function MonthGrid({ year, month }: Props) {
+export default function MonthGrid({ year, month, records }: Props) {
   const navigate = useNavigate();
 
   const firstDay = new Date(year, month, 1);
@@ -33,6 +34,11 @@ export default function MonthGrid({ year, month }: Props) {
   const isWeekend = (d: number) => {
     const dow = new Date(year, month, d).getDay();
     return dow === 0 || dow === 6;
+  };
+
+  const hasRecordsOnDate = (date: Date) => {
+    const dateStr = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    return records.some(r => r.date === dateStr);
   };
 
   const cells: (number | null)[] = [];

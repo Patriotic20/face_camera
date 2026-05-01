@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
-import { mockRecords } from '../../data/mockAttendance';
 import { calculateLateness } from '../../utils/lateness';
+import type { AttendanceRecord } from '../../types/attendance';
 
 const WEEKDAYS = ['Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh', 'Ya'];
 
@@ -16,6 +16,7 @@ type Props = {
   month: number;
   userId: string;
   workStart: string;
+  records: AttendanceRecord[];
 };
 
 type DayInfo = {
@@ -24,7 +25,7 @@ type DayInfo = {
   checkOut: string | null;
 };
 
-export default function UserMonthGrid({ year, month, userId, workStart }: Props) {
+export default function UserMonthGrid({ year, month, userId, workStart, records }: Props) {
   const navigate = useNavigate();
 
   const firstDay = new Date(year, month, 1);
@@ -44,7 +45,7 @@ export default function UserMonthGrid({ year, month, userId, workStart }: Props)
   };
 
   const prefix = `${year}-${pad(month + 1)}-`;
-  const userRecords = mockRecords.filter(
+  const userRecords = records.filter(
     (r) => r.userId === userId && r.date.startsWith(prefix),
   );
 

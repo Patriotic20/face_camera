@@ -7,15 +7,16 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useWorkStartTime } from '../hooks/useWorkStartTime';
-import { USERS, userFullName } from '../data/users';
+import { getAttendanceRecords } from '../data/attendanceApi';
 import {
   getTodayStats,
   getMonthStats,
   getLast7DaysCounts,
   getCameraStats,
 } from '../utils/dashboardStats';
+import type { AttendanceRecord } from '../types/attendance';
 
 const MONTH_NAMES = [
   'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
@@ -89,10 +90,25 @@ function Panel({ title, children }: { title: string; children: ReactNode }) {
 
 export default function Dashboard() {
   const [workStart] = useWorkStartTime();
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
 
-  const today = getTodayStats(workStart);
-  const month = getMonthStats(workStart);
-  const last7 = getLast7DaysCounts();
+  useEffect(() => {
+    const fetchRecords = async () => {
+      try {
+        const data = await getAttendanceRecords();
+        setRecords(data);
+      } catch (error) {
+        console.error('Failed to fetch attendance records:', error);
+        setRecords([]);
+      }
+    };
+
+    fetchRecords();
+  }, []);
+
+  const today = getTodayStats(workStart, records);
+  const month = getMonthStats(workStart, records);
+  const last7 = getLast7DaysCounts(records);
   const cameras = getCameraStats();
 
   return (
@@ -224,29 +240,18 @@ export default function Dashboard() {
           )}
         </Panel>
 
-        <Panel title={`Bugun kelmaganlar (${today.absentUsers.length})`}>
-          {today.absentUsers.length === 0 ? (
+        <Panel title={`Bugun kelmaganlar (${today.absent})`}>
+          {today.absent === 0 ? (
             <p className="text-sm text-slate-400">Hamma keldi</p>
           ) : (
-            <ul className="space-y-2">
-              {today.absentUsers.map((u) => (
-                <li
-                  key={u.id}
-                  className="flex items-center justify-between text-sm"
-                >
-                  <span className="text-slate-700">{userFullName(u)}</span>
-                  <span className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded-lg text-xs">
-                    Kelmagan
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <p className="text-sm text-slate-500">
+              {today.absent} ta foydalanuvchi kelmadi
+            </p>
           )}
         </Panel>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Jami xodim" value={USERS.length} stripe="violet" tinted />
         <StatCard label="Jami kamera" value={cameras.total} stripe="indigo" tinted />
         <StatCard label="Ulangan" value={cameras.connected} stripe="emerald" tinted />
         <StatCard label="Ulanmagan" value={cameras.disconnected} stripe="amber" tinted />

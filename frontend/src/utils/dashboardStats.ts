@@ -1,11 +1,5 @@
 import type { AttendanceRecord } from '../types/attendance';
-import {
-  getRecordsForDate,
-  getRecordsForMonth,
-  mockRecords,
-} from '../data/mockAttendance';
 import { getCameras } from '../data/camerasStorage';
-import { USERS, type User } from '../data/users';
 import { calculateLateness } from './lateness';
 
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -17,11 +11,12 @@ export type TodayStats = {
   onTime: number;
   absent: number;
   lateRecords: Array<{ record: AttendanceRecord; minutes: number }>;
-  absentUsers: User[];
 };
 
-export function getTodayStats(workStart: string): TodayStats {
-  const todayRecords = getRecordsForDate(new Date());
+export function getTodayStats(workStart: string, records: AttendanceRecord[]): TodayStats {
+  const todayRecords = records.filter(
+    (r) => r.date === new Date().toISOString().split('T')[0]
+  );
   const atWork = todayRecords.filter((r) => r.checkOut === null).length;
 
   const lateRecords: TodayStats['lateRecords'] = [];
@@ -35,17 +30,13 @@ export function getTodayStats(workStart: string): TodayStats {
   }
   lateRecords.sort((a, b) => b.minutes - a.minutes);
 
-  const presentUserIds = new Set(todayRecords.map((r) => r.userId));
-  const absentUsers = USERS.filter((u) => !presentUserIds.has(u.id));
-
   return {
     atWork,
     cameToday: todayRecords.length,
     late,
     onTime: todayRecords.length - late,
-    absent: absentUsers.length,
+    absent: 0,
     lateRecords,
-    absentUsers,
   };
 }
 
@@ -56,14 +47,16 @@ export type MonthStats = {
   mostPunctual: { name: string; count: number } | null;
 };
 
-export function getMonthStats(workStart: string): MonthStats {
+export function getMonthStats(workStart: string, records: AttendanceRecord[]): MonthStats {
   const now = new Date();
-  const records = getRecordsForMonth(now.getFullYear(), now.getMonth());
+  const monthRecords = records.filter(
+    (r) => r.date.startsWith(`${now.getFullYear()}-${pad(now.getMonth() + 1)}`)
+  );
 
   const tally = new Map<string, { name: string; total: number; late: number }>();
   let totalLate = 0;
 
-  for (const r of records) {
+  for (const r of monthRecords) {
     const t = tally.get(r.userId) ?? { name: r.userName, total: 0, late: 0 };
     t.total += 1;
     if (calculateLateness(r.checkIn, workStart).late) {
@@ -89,7 +82,7 @@ export function getMonthStats(workStart: string): MonthStats {
   if (mostLate && mostLate.count === 0) mostLate = null;
 
   return {
-    totalRecords: records.length,
+    totalRecords: monthRecords.length,
     totalLate,
     mostLate,
     mostPunctual,
@@ -101,7 +94,7 @@ export type Last7DaysPoint = {
   count: number;
 };
 
-export function getLast7DaysCounts(): Last7DaysPoint[] {
+export function getLast7DaysCounts(records: AttendanceRecord[]): Last7DaysPoint[] {
   const points: Last7DaysPoint[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -110,7 +103,7 @@ export function getLast7DaysCounts(): Last7DaysPoint[] {
     const d = new Date(today);
     d.setDate(today.getDate() - i);
     const key = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    const count = mockRecords.filter((r) => r.date === key).length;
+    const count = records.filter((r) => r.date === key).length;
     points.push({ date: `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`, count });
   }
 

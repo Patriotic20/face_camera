@@ -1,9 +1,11 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
-import { getRecordsForDate, getRecordsForMonth } from '../data/mockAttendance';
+import { useEffect, useState } from 'react';
+import { getAttendanceForDate, getAttendanceForMonth } from '../data/attendanceApi';
 import { getCamera } from '../data/camerasStorage';
 import { useWorkStartTime } from '../hooks/useWorkStartTime';
 import { calculateLateness } from '../utils/lateness';
 import { exportToExcel } from '../utils/excelExport';
+import type { AttendanceRecord } from '../types/attendance';
 
 const MONTH_NAMES = [
   'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
@@ -35,10 +37,30 @@ export default function AttendanceDay() {
   const date = dateParam ? parseDate(dateParam) : null;
 
   const [workStart, setWorkStart] = useWorkStartTime();
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!date) return;
+
+    const fetchRecords = async () => {
+      setLoading(true);
+      try {
+        const data = await getAttendanceForDate(dateParam!);
+        setRecords(data);
+      } catch (error) {
+        console.error('Failed to fetch attendance records:', error);
+        setRecords([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecords();
+  }, [dateParam, date]);
 
   if (!date) return <Navigate to="/attendance" replace />;
 
-  const records = getRecordsForDate(date);
   const lateCount = records.filter(
     (r) => calculateLateness(r.checkIn, workStart).late,
   ).length;
@@ -48,9 +70,16 @@ export default function AttendanceDay() {
   };
 
   const handleExportMonth = () => {
-    const monthRecords = getRecordsForMonth(date.getFullYear(), date.getMonth());
-    const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-    void exportToExcel(monthRecords, workStart, `davomat-${monthKey}.xlsx`);
+    const fetchMonthRecords = async () => {
+      try {
+        const monthRecords = await getAttendanceForMonth(date.getFullYear(), date.getMonth());
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+        void exportToExcel(monthRecords, workStart, `davomat-${monthKey}.xlsx`);
+      } catch (error) {
+        console.error('Failed to fetch month records for export:', error);
+      }
+    };
+    fetchMonthRecords();
   };
 
   return (
@@ -129,7 +158,13 @@ export default function AttendanceDay() {
             </tr>
           </thead>
           <tbody>
-            {records.length === 0 ? (
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-400">
+                  Yuklanmoqda...
+                </td>
+              </tr>
+            ) : records.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-4 py-12 text-center text-sm text-slate-400">
                   Bu kuni davomat yozuvlari yo'q

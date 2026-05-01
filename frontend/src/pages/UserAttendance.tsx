@@ -1,23 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { getUser } from '../data/usersStorage';
 import { userFullName } from '../data/users';
-import { mockRecords } from '../data/mockAttendance';
+import { getAttendanceByPerson } from '../data/attendanceApi';
 import { useWorkStartTime } from '../hooks/useWorkStartTime';
 import { calculateLateness } from '../utils/lateness';
 import UserMonthGrid from '../components/attendance/UserMonthGrid';
+import type { AttendanceRecord } from '../types/attendance';
 
 export default function UserAttendance() {
   const { id } = useParams<{ id: string }>();
   const [workStart] = useWorkStartTime();
   const [year, setYear] = useState(new Date().getFullYear());
+  const [userRecords, setUserRecords] = useState<AttendanceRecord[]>([]);
 
   if (!id) return <Navigate to="/users" replace />;
 
   const user = getUser(id);
   if (!user) return <Navigate to="/users" replace />;
 
-  const userRecords = mockRecords.filter((r) => r.userId === id);
+  useEffect(() => {
+    const fetchUserRecords = async () => {
+      try {
+        const records = await getAttendanceByPerson(id);
+        setUserRecords(records);
+      } catch (error) {
+        console.error('Failed to fetch user attendance records:', error);
+        setUserRecords([]);
+      }
+    };
+
+    fetchUserRecords();
+  }, [id]);
+
   const lateCount = userRecords.filter(
     (r) => calculateLateness(r.checkIn, workStart).late,
   ).length;
@@ -103,6 +118,7 @@ export default function UserAttendance() {
               month={m}
               userId={id}
               workStart={workStart}
+              records={userRecords}
             />
           ))}
         </div>

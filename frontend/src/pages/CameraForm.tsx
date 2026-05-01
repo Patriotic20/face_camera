@@ -69,7 +69,7 @@ export default function CameraForm() {
     if (isEdit && id) {
       updateCamera(id, form);
     } else {
-      addCamera(form);
+      addCamera({ ...form, connected: false });
     }
     navigate('/cameras');
   };
