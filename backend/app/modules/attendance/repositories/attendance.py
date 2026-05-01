@@ -43,6 +43,15 @@ class AttendanceRepository:
         )
         return result.scalar_one_or_none()
 
+    async def exists(self, person_id: int, enter_time: str) -> bool:
+        result = await self.session.execute(
+            select(Attendance.id).where(
+                Attendance.person_id == person_id,
+                Attendance.enter_time == enter_time,
+            )
+        )
+        return result.scalar_one_or_none() is not None
+
     async def get_attendances_by_person(self, person_id: int) -> list[Attendance]:
         result = await self.session.execute(
             select(Attendance)

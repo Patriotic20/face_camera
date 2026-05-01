@@ -30,6 +30,12 @@ class PeopleRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_external_id(self, external_id: str) -> Person | None:
+        result = await self.session.execute(
+            select(Person).where(Person.external_id == external_id)
+        )
+        return result.scalar_one_or_none()
+
     async def update_person(self, person_id: int, data: PersonUpdate) -> Person | None:
         person = await self.get_person_by_id(person_id)
         if not person:

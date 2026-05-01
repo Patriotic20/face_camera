@@ -8,6 +8,7 @@ class PersonBase(BaseModel):
     last_name: str
     third_name: Optional[str] = None
     in_work: bool = True
+    external_id: Optional[str] = None
 
 
 class PersonCreate(PersonBase):

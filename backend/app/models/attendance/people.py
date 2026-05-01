@@ -9,12 +9,13 @@ from typing import Optional
 
 
 class Person(Base, IdIntPk, TimestampMixin):
-    
+
     __tablename__ = "people"
-    
+
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     last_name: Mapped[str] = mapped_column(String(255), nullable=False)
     third_name: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     in_work: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    external_id: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, unique=True)
     
     
