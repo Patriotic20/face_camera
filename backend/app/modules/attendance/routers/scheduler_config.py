@@ -6,7 +6,7 @@ from app.modules.attendance.services.scheduler_config import SchedulerConfigServ
 from app.modules.attendance.repositories.scheduler_config import SchedulerConfigRepository
 from app.modules.attendance.schemes.scheduler_config import SchedulerConfigResponse, SchedulerConfigUpdate
 
-router = APIRouter(prefix="/scheduler-config", tags=["Scheduler Config"])
+router = APIRouter(tags=["Scheduler Config"])
 
 
 @router.get("/", response_model=SchedulerConfigResponse)

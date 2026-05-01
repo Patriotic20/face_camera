@@ -4,11 +4,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.scheduler import create_scheduler
+from app.core.database import db_helper
+from app.models.base import Base
 from app.modules.attendance.routers import attendance, camera, employee, scheduler_config
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create tables if they don't exist
+    async with db_helper.engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
     scheduler = await create_scheduler()
     scheduler.start()
     yield

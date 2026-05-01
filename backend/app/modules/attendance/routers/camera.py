@@ -1,17 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import db_helper
 from app.modules.attendance.repositories.camera import CameraRepository
-from app.modules.attendance.schemes.camera import CameraCreate, CameraUpdate, CameraResponse
+from app.modules.attendance.schemes.camera import CameraCreate, CameraUpdate, CameraResponse, CameraListRequest
 
-router = APIRouter(tags=["Camera"])
-
-
-@router.get("/list", response_model=list[CameraResponse])
-async def get_cameras(session: AsyncSession = Depends(db_helper.session_getter)):
-    repo = CameraRepository(session)
-    return await repo.get_all_cameras()
+router = APIRouter(
+    prefix="/camera",
+    tags=["Camera"]
+)
 
 
 @router.post("/add", response_model=CameraResponse, status_code=201)
@@ -22,10 +19,18 @@ async def add_camera(
     repo = CameraRepository(session)
     return await repo.create_camera(data)
 
+@router.get("/list", response_model=list[CameraResponse])
+async def get_cameras(
+    data: CameraListRequest = Depends(),
+    session: AsyncSession = Depends(db_helper.session_getter)
+):
+    repo = CameraRepository(session)
+    return await repo.list_cameras(data)
+
 
 @router.get("/{camera_id}", response_model=CameraResponse)
 async def get_camera(
-    camera_id: int,
+    camera_id: int = Fil,
     session: AsyncSession = Depends(db_helper.session_getter),
 ):
     repo = CameraRepository(session)
