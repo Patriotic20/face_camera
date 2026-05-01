@@ -10,6 +10,8 @@ class CameraBase(BaseModel):
     ip_address: str
     login: str
     type: CameraType
+    work_start_time: str = "08:00"
+    work_end_time: str = "17:00"
 
 
 class CameraCreate(CameraBase):
@@ -23,6 +25,8 @@ class CameraUpdate(BaseModel):
     password: Optional[str] = None
     type: Optional[CameraType] = None
     status: Optional[CameraStatus] = None
+    work_start_time: Optional[str] = None
+    work_end_time: Optional[str] = None
 
 
 class CameraResponse(CameraBase):

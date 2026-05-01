@@ -4,7 +4,7 @@ from app.core.mixins.id_int_pk import IdIntPk
 from app.core.mixins.time_stamp_mixin import TimestampMixin
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import Enum
+from sqlalchemy import Enum, String
 from enum import Enum as PyEnum
 
 # Определяем Enum'ы прямо в файле или импортируем
@@ -37,3 +37,6 @@ class Camera(Base, IdIntPk, TimestampMixin):
         default=CameraStatus.INACTIVE,
         nullable=False
     )
+
+    work_start_time: Mapped[str] = mapped_column(String(5), nullable=False, default="08:00")
+    work_end_time: Mapped[str] = mapped_column(String(5), nullable=False, default="17:00")

@@ -1,79 +1,48 @@
-import re
-from datetime import datetime, timezone
-
-import httpx
-
 from app.modules.attendance.repositories.attendance import AttendanceRepository
 from app.modules.attendance.repositories.camera import CameraRepository
-from app.modules.attendance.repositories.people import PeopleRepository
 from app.modules.attendance.schemes.attendance import AttendanceCreate
-from app.modules.attendance.schemes.people import PersonCreate
-
-_RECORD_RE = re.compile(r"records\[(\d+)\]\.(\w+)=(.*)")
-
-
-def _parse_camera_response(text: str) -> list[dict[str, str]]:
-    raw: dict[int, dict[str, str]] = {}
-    for line in text.splitlines():
-        m = _RECORD_RE.match(line)
-        if m:
-            idx, key, value = m.groups()
-            raw.setdefault(int(idx), {})[key] = value.strip()
-    return [raw[i] for i in sorted(raw)]
-
-
-def _split_full_name(card_name: str) -> tuple[str, str]:
-    parts = card_name.strip().split(" ", 1)
-    return (parts[0], parts[1]) if len(parts) == 2 else (parts[0], parts[0])
+from app.modules.attendance.services.camera import CameraService
+from app.modules.attendance.services.people import PeopleService
 
 
 class AttendanceService:
     def __init__(
         self,
-        people_repo: PeopleRepository,
-        attendance_repo: AttendanceRepository,
         camera_repo: CameraRepository,
+        attendance_repo: AttendanceRepository,
+        camera_service: CameraService,
+        people_service: PeopleService,
     ) -> None:
-        self.people_repo = people_repo
-        self.attendance_repo = attendance_repo
         self.camera_repo = camera_repo
+        self.attendance_repo = attendance_repo
+        self.camera_service = camera_service
+        self.people_service = people_service
 
-    async def sync_camera_logs(
+    async def sync_logs_for_camera(
         self,
         camera_id: int,
-        start_date: str,
-        end_date: str,
+        start_time: str,
+        end_time: str,
         limit: int = 1000,
     ) -> dict[str, int]:
         """
-        Fetch access logs from camera, create missing Person records,
-        and insert new Attendance entries.
+        Fetch access logs from a camera for the given window, resolve persons,
+        and persist new attendance records.
 
-        Returns counts of synced_people, synced_attendances, skipped_duplicates.
+        Returns counts: synced_people, synced_attendances, skipped_duplicates.
         """
         camera = await self.camera_repo.get_camera_by_id(camera_id)
         if camera is None:
             raise ValueError(f"Camera {camera_id} not found")
 
-        url = f"http://{camera.ip_address}/cgi-bin/recordFinder.cgi"
-        params = {
-            "action": "find",
-            "name": "AccessControlCardRec",
-            "condition.Channel": 1,
-            "condition.StartTime": start_date,
-            "condition.EndTime": end_date,
-            "count": limit,
-            "start": 0,
-        }
-
-        async with httpx.AsyncClient(
-            auth=httpx.DigestAuth(camera.login, camera.password),
-            timeout=30,
-        ) as client:
-            response = await client.get(url, params=params)
-            response.raise_for_status()
-
-        records = _parse_camera_response(response.text)
+        records = await self.camera_service.fetch_raw_logs(
+            ip=camera.ip_address,
+            login=camera.login,
+            password=camera.password,
+            start_time=start_time,
+            end_time=end_time,
+            limit=limit,
+        )
 
         synced_people = 0
         synced_attendances = 0
@@ -90,16 +59,10 @@ class AttendanceService:
             if not external_id or not enter_time:
                 continue
 
-            person = await self.people_repo.get_by_external_id(external_id)
-            if person is None:
-                first_name, last_name = _split_full_name(card_name)
-                person = await self.people_repo.create_person(
-                    PersonCreate(
-                        first_name=first_name,
-                        last_name=last_name,
-                        external_id=external_id,
-                    )
-                )
+            person, was_created = await self.people_service.get_or_create_person(
+                external_id, card_name
+            )
+            if was_created:
                 synced_people += 1
 
             if await self.attendance_repo.exists(person.id, enter_time):
