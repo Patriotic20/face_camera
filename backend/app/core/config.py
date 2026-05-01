@@ -34,9 +34,16 @@ class DatabaseConfig(BaseModel):
     max_overflow: int = 10
 
 
+class SchedulerConfig(BaseModel):
+    morning_hour: int = 9
+    morning_minute: int = 0
+    evening_hour: int = 18
+    evening_minute: int = 0
+
+
 class AppConfig(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=BASE_DIR / ".env",
         case_sensitive=False,
         env_nested_delimiter="__",
         env_prefix="APP_CONFIG__",
@@ -46,6 +53,11 @@ class AppConfig(BaseSettings):
     server: ServerConfig
     database: DatabaseConfig
     jwt: JwtConfig
+    scheduler: SchedulerConfig
+
+
+def get_settings() -> AppConfig:
+    return AppConfig()
 
 
 

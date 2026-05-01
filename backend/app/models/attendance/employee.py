@@ -8,9 +8,9 @@ from sqlalchemy import String, Boolean
 from typing import Optional
 
 
-class Person(Base, IdIntPk, TimestampMixin):
+class Employee(Base, IdIntPk, TimestampMixin):
 
-    __tablename__ = "people"
+    __tablename__ = "employees"
 
     first_name: Mapped[str] = mapped_column(String(255), nullable=False)
     last_name: Mapped[str] = mapped_column(String(255), nullable=False)

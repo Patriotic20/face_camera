@@ -3,7 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
 
-class PersonBase(BaseModel):
+class EmployeeBase(BaseModel):
     first_name: str
     last_name: str
     third_name: Optional[str] = None
@@ -11,18 +11,18 @@ class PersonBase(BaseModel):
     external_id: Optional[str] = None
 
 
-class PersonCreate(PersonBase):
+class EmployeeCreate(EmployeeBase):
     pass
 
 
-class PersonUpdate(BaseModel):
+class EmployeeUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     third_name: Optional[str] = None
     in_work: Optional[bool] = None
 
 
-class PersonResponse(PersonBase):
+class EmployeeResponse(EmployeeBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -30,8 +30,8 @@ class PersonResponse(PersonBase):
     updated_at: datetime
 
 
-class PersonList(BaseModel):
+class EmployeeList(BaseModel):
     page: int
     size: int
     total: int
-    persons: list[PersonResponse]
+    employees: list[EmployeeResponse]

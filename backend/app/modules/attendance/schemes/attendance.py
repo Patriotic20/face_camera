@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict
 
 
 class AttendanceBase(BaseModel):
-    person_id: int
+    employee_id: int
     enter_camera_id: int
     enter_time: str
     status: str

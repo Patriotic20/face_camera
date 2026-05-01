@@ -2,7 +2,7 @@ from app.modules.attendance.repositories.attendance import AttendanceRepository
 from app.modules.attendance.repositories.camera import CameraRepository
 from app.modules.attendance.schemes.attendance import AttendanceCreate
 from app.modules.attendance.services.camera import CameraService
-from app.modules.attendance.services.people import PeopleService
+from app.modules.attendance.services.employee import EmployeeService
 
 
 class AttendanceService:
@@ -11,12 +11,12 @@ class AttendanceService:
         camera_repo: CameraRepository,
         attendance_repo: AttendanceRepository,
         camera_service: CameraService,
-        people_service: PeopleService,
+        employee_service: EmployeeService,
     ) -> None:
         self.camera_repo = camera_repo
         self.attendance_repo = attendance_repo
         self.camera_service = camera_service
-        self.people_service = people_service
+        self.employee_service = employee_service
 
     async def sync_logs_for_camera(
         self,
@@ -26,7 +26,7 @@ class AttendanceService:
         limit: int = 1000,
     ) -> dict[str, int]:
         """
-        Fetch access logs from a camera for the given window, resolve persons,
+        Fetch access logs from a camera for the given window, resolve employees,
         and persist new attendance records.
 
         Returns counts: synced_people, synced_attendances, skipped_duplicates.
@@ -59,19 +59,19 @@ class AttendanceService:
             if not external_id or not enter_time:
                 continue
 
-            person, was_created = await self.people_service.get_or_create_person(
+            employee, was_created = await self.employee_service.get_or_create_employee(
                 external_id, card_name
             )
             if was_created:
                 synced_people += 1
 
-            if await self.attendance_repo.exists(person.id, enter_time):
+            if await self.attendance_repo.exists(employee.id, enter_time):
                 skipped_duplicates += 1
                 continue
 
             await self.attendance_repo.create_attendance(
                 AttendanceCreate(
-                    person_id=person.id,
+                    employee_id=employee.id,
                     enter_camera_id=camera_id,
                     enter_time=enter_time,
                     status=rec.get("Status", ""),

@@ -3,14 +3,15 @@ from datetime import datetime, timedelta
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from app.core.db import AsyncSessionLocal
+from app.core.database import db_helper
 from app.models.attendance.camera import CameraStatus
 from app.modules.attendance.repositories.attendance import AttendanceRepository
 from app.modules.attendance.repositories.camera import CameraRepository
-from app.modules.attendance.repositories.people import PeopleRepository
+from app.modules.attendance.repositories.employee import EmployeeRepository
+from app.modules.attendance.repositories.scheduler_config import SchedulerConfigRepository
 from app.modules.attendance.services.attendance import AttendanceService
 from app.modules.attendance.services.camera import CameraService
-from app.modules.attendance.services.people import PeopleService
+from app.modules.attendance.services.employee import EmployeeService
 
 logger = logging.getLogger(__name__)
 
@@ -26,17 +27,17 @@ def _build_window(base_hhmm: str, date: datetime) -> tuple[str, str]:
 
 async def _run_sync(use_work_start: bool) -> None:
     today = datetime.now()
-    async with AsyncSessionLocal() as session:
+    async with db_helper.session_factory() as session:
         camera_repo = CameraRepository(session)
-        people_repo = PeopleRepository(session)
+        employee_repo = EmployeeRepository(session)
         attendance_repo = AttendanceRepository(session)
         camera_service = CameraService()
-        people_service = PeopleService(people_repo)
+        employee_service = EmployeeService(employee_repo)
         attendance_service = AttendanceService(
             camera_repo=camera_repo,
             attendance_repo=attendance_repo,
             camera_service=camera_service,
-            people_service=people_service,
+            employee_service=employee_service,
         )
 
         cameras = await camera_repo.get_all_cameras()
@@ -72,8 +73,16 @@ async def _evening_sync() -> None:
     await _run_sync(use_work_start=False)
 
 
-def create_scheduler() -> AsyncIOScheduler:
+async def create_scheduler() -> AsyncIOScheduler:
     scheduler = AsyncIOScheduler()
-    scheduler.add_job(_morning_sync, "cron", hour=9, minute=0, id="morning_sync")
-    scheduler.add_job(_evening_sync, "cron", hour=18, minute=0, id="evening_sync")
+    
+    async with db_helper.session_factory() as session:
+        repo = SchedulerConfigRepository(session)
+        config = await repo.get_config()
+        if not config:
+            config = await repo.create_default_config()
+        
+        scheduler.add_job(_morning_sync, "cron", hour=config.morning_hour, minute=config.morning_minute, id="morning_sync")
+        scheduler.add_job(_evening_sync, "cron", hour=config.evening_hour, minute=config.evening_minute, id="evening_sync")
+    
     return scheduler
